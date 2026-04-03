@@ -10,7 +10,7 @@ A Python-based desktop application that allows users to automate left mouse clic
 
 ## Purpose
 
-This project was developed to provide a simple and accessible automation tool for users who may not be comfortable with more complex software. The goal was to create a lightweight application with clear controls and minimal setup.
+This project was originally developed to help users reduce repetitive strain from frequent mouse clicking. It provides a simple, accessible automation tool designed for non-technical users, with lightweight installation and minimal setup.
 
 ---
 
@@ -89,9 +89,19 @@ Before activation, a countdown is displayed through an overlay window, giving us
 
 ---
 
+## Appropriate Use
+
+This software is intended for general automation and accessibility purposes only. 
+Use in environments where automated clickers are prohibited, unauthorized, or illegal is strictly prohibited. 
+Users are solely responsible for ensuring that their use of this software complies with all applicable laws and platform rules.
+
+---
+
 ## Disclaimer
 
-This tool is intended for general automation and accessibility purposes. Users are responsible for ensuring it is used appropriately within the rules of any software or platform.
+This software is provided “as-is,” without any warranties of any kind, express or implied. 
+The developer is not responsible for any damage, loss, or consequences arising from the use of this software, including but not limited to misuse, violation of rules, or unintended system behavior. 
+By using this software, you acknowledge and accept full responsibility for any outcomes resulting from its use.
 
 ---
 
