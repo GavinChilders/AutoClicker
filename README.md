@@ -1,5 +1,9 @@
 # Auto Clicker Macro
 
+![Python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)
+![Version](https://img.shields.io/badge/version-0.1.0-2ea44f)
+![Status](https://img.shields.io/badge/status-early_stage-yellow)
+
 A Python-based desktop application that allows users to automate left mouse clicks with adjustable speed and delay. Designed with simplicity in mind, this tool provides an intuitive interface for users with little to no technical experience.
 
 ---
