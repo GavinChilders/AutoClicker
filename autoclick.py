@@ -7,7 +7,7 @@
 # Date: 2026-04-01
 # Last Updated: 2026-04-01
 #
-# Version 1.0.0 - Basic Functionality, UI, and OBS Overlay
+# Version 0.1.0 -- Early Stage Functionality
 #=======================================================================
 
 # Imports
