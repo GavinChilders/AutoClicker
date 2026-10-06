@@ -5,186 +5,528 @@
 #
 # Author: Gavin Childers
 # Date: 2026-04-01
-# Last Updated: 2026-04-01
+# Last Updated: 2026-10-06
 #
-# Version 0.1.0 -- Early Stage Functionality
+# Version 0.2.0 -- Early Stage
 #=======================================================================
 
 # Imports
-import tkinter as tk
-from tkinter import ttk
-import threading
 import time
-import pyautogui
-from pynput import keyboard
+import threading
+import tkinter as tk
 
-# Global States
-running = False
-
-# Click Loop
-def click_loop(cps):
-    global running
-    delay = 1 / cps
-
-    while running:
-        pyautogui.click()
-        time.sleep(delay)
-
-# Pre-Timer + Start Logic
-def pre_timer_and_start(cps, duration):
-    global running
-
-    remaining = duration
-
-    # Show overlay
-    overlay.deiconify()
-
-    while remaining > 0:
-        overlay_label.config(text=f"Starting in {remaining}")
-        time.sleep(1)
-        remaining -= 1
-
-    # Hide overlay
-    #overlay.withdraw()
-
-    # Start clicking
-    running = True
-    threading.Thread(
-        target=click_loop,
-        args=(cps,),
-        daemon=True
-    ).start()
-
-# Start / Stop
-def start_clicking():
-    global running
-
-    if running:
-        return
-
-    cps = float(cps_slider.get())
-    duration = int(timer_slider.get())
-
-    threading.Thread(
-        target=pre_timer_and_start,
-        args=(cps, duration),
-        daemon=True
-    ).start()
+from pynput.mouse import Button, Controller
+from pynput.keyboard import Listener, KeyCode
 
 
-def stop_clicking():
-    global running
-    running = False
-    overlay.withdraw()
+#=======================================================================
+# Auto Clicker Class
+#=======================================================================
 
-# Key Listener (F6 Toggle)
-def on_press(key):
-    global running
-    try:
-        if key == keyboard.Key.f6:
-            if running:
-                stop_clicking()
+class AutoClicker(threading.Thread):
+
+    def __init__(self, delay, button):
+        super().__init__(daemon=True)
+
+        self.delay = delay
+        self.button = button
+
+        self.click_event = threading.Event()
+        self.stop_event = threading.Event()
+
+        self.mouse = Controller()
+
+    def start_clicking(self):
+        self.click_event.set()
+
+    def stop_clicking(self):
+        self.click_event.clear()
+
+    def exit(self):
+        self.stop_clicking()
+        self.stop_event.set()
+
+    def update_config(self, delay=None, button=None):
+        if delay is not None:
+            self.delay = delay
+
+        if button is not None:
+            self.button = button
+
+    def run(self):
+        while not self.stop_event.is_set():
+
+            if self.click_event.is_set():
+                self.mouse.click(self.button)
+                time.sleep(self.delay)
+
             else:
-                start_clicking()
-    except:
-        pass
+                time.sleep(0.01)
 
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
 
-# UI Setup
-root = tk.Tk()
-root.title("Auto Clicker")
-root.geometry("300x300")
+#=======================================================================
+# Application
+#=======================================================================
 
-# CPS Label
-cps_label = ttk.Label(root, text="Clicks Per Second")
-cps_label.pack()
+class AutoClickerApp:
 
-# CPS Slider
-cps_slider = ttk.Scale(root, from_=1, to=50, orient="horizontal")
-cps_slider.set(10)
-cps_slider.pack()
+    def __init__(self, root):
 
-cps_value_label = ttk.Label(root, text="10 CPS")
-cps_value_label.pack()
+        self.root = root
 
-# Timer Label
-timer_label = ttk.Label(root, text="Start Delay (seconds)")
-timer_label.pack()
+        #---------------------------------------------------------------
+        # Default Configuration
+        #---------------------------------------------------------------
 
-# Timer Slider
-timer_slider = ttk.Scale(root, from_=1, to=300, orient="horizontal")
-timer_slider.set(5)
-timer_slider.pack()
+        self.delay = 0.001
+        self.button = Button.left
 
-timer_value_label = ttk.Label(root, text="5 sec")
-timer_value_label.pack()
+        self.start_key = KeyCode(char="a")
+        self.exit_key = KeyCode(char="b")
 
-# Dynamic Slider Updates
-def update_cps(val):
-    cps_value_label.config(text=f"{int(float(val))} CPS")
+        #---------------------------------------------------------------
+        # Auto Clicker
+        #---------------------------------------------------------------
 
-def update_timer(val):
-    timer_value_label.config(text=f"{int(float(val))} sec")
+        self.clicker = AutoClicker(
+            self.delay,
+            self.button
+        )
 
-cps_slider.config(command=update_cps)
-timer_slider.config(command=update_timer)
+        self.clicker.start()
 
-# Buttons
-start_btn = ttk.Button(root, text="Start", command=start_clicking)
-start_btn.pack(pady=5)
+        #---------------------------------------------------------------
+        # Create GUI
+        #---------------------------------------------------------------
 
-stop_btn = ttk.Button(root, text="Stop", command=stop_clicking)
-stop_btn.pack(pady=5)
+        self.create_gui()
 
-# Overlay Window (OBS Ready)
-overlay = tk.Toplevel(root)
-overlay.overrideredirect(True)
-overlay.attributes("-topmost", True)
+        #---------------------------------------------------------------
+        # Keyboard Listener
+        #---------------------------------------------------------------
 
-# OBS-specific: give title and transparency
-overlay.title("ClickerOverlay")
-overlay.config(bg="black")
-overlay.attributes("-transparentcolor", "black")
+        self.listener = Listener(
+            on_press=self.on_press
+        )
 
-# Center overlay on screen
-overlay.update_idletasks()
-width = 250
-height = 100
-screen_width = overlay.winfo_screenwidth()
-screen_height = overlay.winfo_screenheight()
-x = (screen_width // 2) - (width // 2)
-y = (screen_height // 2) - (height // 2)
-overlay.geometry(f"{width}x{height}+{x}+{y}")
+        self.listener.start()
 
-# Overlay label
-overlay_label = tk.Label(
-    overlay,
-    text="",
-    font=("Arial", 24, "bold"),
-    bg="black",
-    fg="white"
-)
-overlay_label.pack(fill="both", expand=True)
 
-# Hide initially
-overlay.withdraw()
+    #===================================================================
+    # GUI
+    #===================================================================
 
-# Make overlay draggable
-def start_move(event):
-    overlay.x = event.x
-    overlay.y = event.y
+    def create_gui(self):
 
-def do_move(event):
-    x = event.x_root - overlay.x
-    y = event.y_root - overlay.y
-    overlay.geometry(f"+{x}+{y}")
+        self.root.title("AutoClicker")
+        self.root.attributes("-fullscreen", False)
 
-overlay.bind("<Button-1>", start_move)
-overlay.bind("<B1-Motion>", do_move)
+        #---------------------------------------------------------------
+        # Keyboard Bindings
+        #---------------------------------------------------------------
 
-# ======================
-#        MAIN
-# ======================
-root.mainloop()
+        self.root.bind(
+            "<Escape>",
+            self.exit_fullscreen
+        )
+
+        self.root.bind(
+            "<Control-q>",
+            self.close_app
+        )
+
+        self.root.bind(
+            "<Control-f>",
+            self.enter_fullscreen
+        )
+
+        #---------------------------------------------------------------
+        # Button Frame
+        #---------------------------------------------------------------
+
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(pady=10)
+
+        exit_button = tk.Button(
+            button_frame,
+            text="Exit",
+            command=self.close_app
+        )
+
+        exit_button.pack(
+            side=tk.LEFT,
+            padx=5
+        )
+
+        fullscreen_button = tk.Button(
+            button_frame,
+            text="Fullscreen",
+            command=self.enter_fullscreen
+        )
+
+        fullscreen_button.pack(
+            side=tk.LEFT,
+            padx=5
+        )
+
+        #---------------------------------------------------------------
+        # Instructions
+        #---------------------------------------------------------------
+
+        instructions = tk.Label(
+            self.root,
+            text=(
+                "Press 'a' to start/stop clicking, "
+                "'b' to exit, "
+                "'Esc' to exit fullscreen, "
+                "'Ctrl+F' to enter fullscreen, "
+                "'Ctrl+Q' to quit."
+            ),
+            font=("Arial", 12)
+        )
+
+        instructions.pack(pady=20)
+
+        #---------------------------------------------------------------
+        # Configuration Frame
+        #---------------------------------------------------------------
+
+        config_frame = tk.Frame(self.root)
+        config_frame.pack(pady=20)
+
+        config_label = tk.Label(
+            config_frame,
+            text="Clicker Configuration",
+            font=("Arial", 14, "bold")
+        )
+
+        config_label.grid(
+            row=0,
+            column=0,
+            columnspan=2,
+            pady=10
+        )
+
+        #---------------------------------------------------------------
+        # Start/Stop Key
+        #---------------------------------------------------------------
+
+        start_key_label = tk.Label(
+            config_frame,
+            text="Start/Stop Key:"
+        )
+
+        start_key_label.grid(
+            row=1,
+            column=0,
+            sticky="e",
+            padx=5
+        )
+
+        self.start_key_entry = tk.Entry(
+            config_frame
+        )
+
+        self.start_key_entry.insert(
+            0,
+            self.start_key.char
+        )
+
+        self.start_key_entry.grid(
+            row=1,
+            column=1,
+            padx=5
+        )
+
+        #---------------------------------------------------------------
+        # Exit Key
+        #---------------------------------------------------------------
+
+        exit_key_label = tk.Label(
+            config_frame,
+            text="Exit Key:"
+        )
+
+        exit_key_label.grid(
+            row=2,
+            column=0,
+            sticky="e",
+            padx=5
+        )
+
+        self.exit_key_entry = tk.Entry(
+            config_frame
+        )
+
+        self.exit_key_entry.insert(
+            0,
+            self.exit_key.char
+        )
+
+        self.exit_key_entry.grid(
+            row=2,
+            column=1,
+            padx=5
+        )
+
+        #---------------------------------------------------------------
+        # Mouse Button
+        #---------------------------------------------------------------
+
+        mouse_button_label = tk.Label(
+            config_frame,
+            text="Mouse Button:"
+        )
+
+        mouse_button_label.grid(
+            row=3,
+            column=0,
+            sticky="e",
+            padx=5
+        )
+
+        self.mouse_button_var = tk.StringVar(
+            value="left"
+        )
+
+        mouse_button_menu = tk.OptionMenu(
+            config_frame,
+            self.mouse_button_var,
+            "left",
+            "right",
+            "middle"
+        )
+
+        mouse_button_menu.grid(
+            row=3,
+            column=1,
+            padx=5
+        )
+
+        #---------------------------------------------------------------
+        # Delay
+        #---------------------------------------------------------------
+
+        delay_label = tk.Label(
+            config_frame,
+            text="Delay (seconds):"
+        )
+
+        delay_label.grid(
+            row=4,
+            column=0,
+            sticky="e",
+            padx=5
+        )
+
+        self.delay_entry = tk.Entry(
+            config_frame
+        )
+
+        self.delay_entry.insert(
+            0,
+            str(self.delay)
+        )
+
+        self.delay_entry.grid(
+            row=4,
+            column=1,
+            padx=5
+        )
+
+        #---------------------------------------------------------------
+        # Apply Configuration
+        #---------------------------------------------------------------
+
+        apply_button = tk.Button(
+            config_frame,
+            text="Apply Configuration",
+            command=self.apply_config
+        )
+
+        apply_button.grid(
+            row=5,
+            column=0,
+            columnspan=2,
+            pady=15
+        )
+
+
+    #===================================================================
+    # Keyboard Listener
+    #===================================================================
+
+    def on_press(self, key):
+
+        if key == self.start_key:
+
+            if self.clicker.click_event.is_set():
+
+                self.clicker.stop_clicking()
+
+                print("[INFO] Clicker Stopped.")
+
+            else:
+
+                self.clicker.start_clicking()
+
+                print("[INFO] Clicker Started.")
+
+        elif key == self.exit_key:
+
+            self.close_app()
+
+
+    #===================================================================
+    # Configuration
+    #===================================================================
+
+    def apply_config(self):
+
+        #---------------------------------------------------------------
+        # Delay
+        #---------------------------------------------------------------
+
+        try:
+
+            new_delay = float(
+                self.delay_entry.get()
+            )
+
+            if new_delay < 0:
+                raise ValueError
+
+        except ValueError:
+
+            print("[ERROR] Invalid delay.")
+
+            return
+
+        #---------------------------------------------------------------
+        # Mouse Button
+        #---------------------------------------------------------------
+
+        button_name = self.mouse_button_var.get()
+
+        button_map = {
+            "left": Button.left,
+            "right": Button.right,
+            "middle": Button.middle
+        }
+
+        new_button = button_map.get(
+            button_name
+        )
+
+        if new_button is None:
+
+            print("[ERROR] Invalid mouse button.")
+
+            return
+
+        #---------------------------------------------------------------
+        # Start/Stop Key
+        #---------------------------------------------------------------
+
+        start_key_value = (
+            self.start_key_entry
+            .get()
+            .strip()
+            .lower()
+        )
+
+        if len(start_key_value) != 1:
+
+            print("[ERROR] Start/Stop key must be one character.")
+
+            return
+
+        new_start_key = KeyCode(
+            char=start_key_value
+        )
+
+        #---------------------------------------------------------------
+        # Exit Key
+        #---------------------------------------------------------------
+
+        exit_key_value = (
+            self.exit_key_entry
+            .get()
+            .strip()
+            .lower()
+        )
+
+        if len(exit_key_value) != 1:
+
+            print("[ERROR] Exit key must be one character.")
+
+            return
+
+        new_exit_key = KeyCode(
+            char=exit_key_value
+        )
+
+        #---------------------------------------------------------------
+        # Apply
+        #---------------------------------------------------------------
+
+        self.delay = new_delay
+        self.button = new_button
+        self.start_key = new_start_key
+        self.exit_key = new_exit_key
+
+        self.clicker.update_config(
+            delay=self.delay,
+            button=self.button
+        )
+
+        print("[INFO] Configuration Applied.")
+
+
+    #===================================================================
+    # Fullscreen
+    #===================================================================
+
+    def exit_fullscreen(self, event=None):
+
+        self.root.attributes(
+            "-fullscreen",
+            False
+        )
+
+
+    def enter_fullscreen(self, event=None):
+
+        self.root.attributes(
+            "-fullscreen",
+            True
+        )
+
+
+    #===================================================================
+    # Application Shutdown
+    #===================================================================
+
+    def close_app(self, event=None):
+
+        print("[INFO] Exiting.")
+
+        self.clicker.exit()
+
+        if self.listener.is_alive():
+            self.listener.stop()
+
+        self.root.destroy()
+
+
+#=======================================================================
+# Main
+#=======================================================================
+
+if __name__ == "__main__":
+
+    root = tk.Tk()
+
+    app = AutoClickerApp(root)
+
+    root.mainloop()
