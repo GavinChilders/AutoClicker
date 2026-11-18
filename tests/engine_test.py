@@ -25,7 +25,7 @@ def test_engine_start_and_stop():
     mock_click.assert_called_with(Button.right)
 
 def test_engine_toggle_and_state_callback():
-    config = ClickerEngine(interval=0.05)
+    config = ClickerConfig(interval=0.05)
     mock_click = MagicMock()
     states = []
 

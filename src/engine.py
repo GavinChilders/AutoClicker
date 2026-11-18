@@ -13,10 +13,10 @@ class ClickerEngine:
     def __init__(self, 
                  config: ClickerConfig, 
                  click_callback: Optional[Callable[[Button],None]],
-                 on_stage_change: Optional[Callable[[bool],None]]):
+                 on_state_change: Optional[Callable[[bool],None]]):
         self.config = config
         self.click_callback = click_callback or Controller().click
-        self.on_stage_change = on_stage_change
+        self.on_state_change = on_state_change
 
         self._stop_event = threading.Event()
         self._lock = threading.Lock()
@@ -70,4 +70,4 @@ class ClickerEngine:
     def _notify_state_change(self, running:bool) -> None:
         """Notifies an optional UI listener when the engine starts or stops"""
         if self._on_state_change is not None:
-            self.on_stage_change(running)
+            self.on_state_change(running)
