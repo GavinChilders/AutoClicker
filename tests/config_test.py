@@ -24,13 +24,13 @@ def test_valid_config():
 
 def test_setting_config():
     config = ClickerConfig()
-    config.set_interval(0.5)
+    config.interval = 0.5
     assert config.interval == 0.5
 
-    config.set_button(mouse.Button.middle)
+    config.button = mouse.Button.middle
     assert config.button == mouse.Button.middle
 
-    config.set_hotkey(keyboard.KeyCode.from_char("f"))
+    config.hotkey = keyboard.KeyCode.from_char("f")
     assert config.hotkey == keyboard.KeyCode.from_char("f")
 
 
