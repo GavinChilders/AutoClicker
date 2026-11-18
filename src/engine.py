@@ -38,6 +38,8 @@ class ClickerEngine:
             self._thread = threading.Thread(target=self._run_loop, daemon=True)
             self._thread.start()
 
+        self._notify_state_change(True)
+
     def stop(self) -> None:
         """Signals the background clicking loop to stop and waits breifly for exit"""
         with self._lock:
