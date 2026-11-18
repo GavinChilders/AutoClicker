@@ -1,32 +1,35 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 Gavin Childers
 
-name: Run AutoClicker Automatic Tests
+name: Run Automated Tests
 
 on:
   push:
-    branches: [main, v2_refactor]
+    branches:
+      - main
+      - v2_refactor
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   pytest:
-    runs-on: unbuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository Code
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Set Up Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run pytest
+      - name: Run pytest with virtual display
         run: xvfb-run -a pytest -v
