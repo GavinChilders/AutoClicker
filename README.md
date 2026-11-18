@@ -2,13 +2,13 @@
 
 ![Python](https://img.shields.io/badge/python-3.13-3776AB?logo=python\&logoColor=white)
 
-![Version](https://img.shields.io/badge/version-0.2.0-2ea44f)
+![Version](https://img.shields.io/badge/version-1.0.0-2ea44f)
 
 ![Status](https://img.shields.io/badge/status-early_stage-yellow)
 
 A Python-based desktop application that automates mouse clicking at the current cursor position. The application provides a simple Tkinter-based graphical interface along with global keyboard controls for starting, stopping, and exiting the clicker.
 
-> **Version 0.2.0 represents a complete overhaul of the original application.** The program has been substantially reworked, including its architecture, threading model, configuration system, and graphical interface.
+> **Version 1.0.0 represents a complete overhaul of the original application.** The program has been substantially reworked, including its architecture, threading model, configuration system, and graphical interface.
 
 ---
 
