@@ -16,7 +16,7 @@ class ClickerEngine:
                  on_state_change: Optional[Callable[[bool],None]] = None):
         self.config = config
         self._click_callback = click_callback or Controller().click
-        self.on_state_change = on_state_change
+        self._on_state_change = on_state_change
 
         self._stop_event = threading.Event()
         self._lock = threading.Lock()
