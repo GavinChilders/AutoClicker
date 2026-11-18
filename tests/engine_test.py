@@ -32,7 +32,7 @@ def test_engine_toggle_and_state_callback():
     engine = ClickerEngine(
         config=config,
         click_callback=mock_click,
-        on_stage_change=states.append
+        on_state_change=states.append
     )
 
     engine.toggle()

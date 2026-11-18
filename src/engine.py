@@ -12,8 +12,8 @@ class ClickerEngine:
 
     def __init__(self, 
                  config: ClickerConfig, 
-                 click_callback: Optional[Callable[[Button],None]],
-                 on_state_change: Optional[Callable[[bool],None]]):
+                 click_callback: Optional[Callable[[Button],None]] = None,
+                 on_state_change: Optional[Callable[[bool],None]] = None):
         self.config = config
         self.click_callback = click_callback or Controller().click
         self.on_state_change = on_state_change
