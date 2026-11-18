@@ -21,17 +21,33 @@ class ClickerConfig:
         self.validate()
 
     def validate(self) -> None:
-        """Validates that all configuration attributes are within safe bounds."""
-        if isinstance(self.interval, bool) or not isinstance(self.interval, (int, float)):
-            raise ValueError(f"Invalid interval type: {self.interval!r} -- Must be a number")
-        if self.interval < 0.01 or self.interval > 60.0:
+        """Validates all current configuration attributes."""
+        self._validate_interval(self._interval)
+        self._validate_button(self._button)
+        self._validate_hotkey(self._hotkey)
+
+    @staticmethod
+    def _validate_interval(interval) -> None:
+        if isinstance(interval, bool) or not isinstance(interval, (int, float)):
+            raise ValueError(f"Invalid interval type: {interval!r} -- Must be a number")
+        if interval < 0.01 or interval > 60.0:
             raise ValueError(
-                f"Invalid interval: {self.interval} -- Please choose an interval between 0.01 and 60.0 seconds"
+                f"Invalid interval: {interval} -- Please choose an interval between 0.01 and 60.0 seconds"
             )
-        if not isinstance(self.button, Button):
-            raise ValueError(f"Invalid mouse button: {self.button!r}")
-        if not isinstance(self.hotkey, (keyboard.KeyCode, keyboard.Key)):
-            raise ValueError(f"Invalid keyboard hotkey: {self.hotkey!r}")
+
+    @staticmethod
+    def _validate_button(button) -> None:
+        if not isinstance(button, Button):
+            raise ValueError(f"Invalid mouse button: {button!r}")
+
+    @staticmethod
+    def _validate_hotkey(hotkey) -> None:
+        if not isinstance(hotkey, (keyboard.KeyCode, keyboard.Key)):
+            raise ValueError(f"Invalid keyboard hotkey: {hotkey!r}")
+
+    @property
+    def interval(self) -> float:
+        return self._interval
 
     @interval.setter
     def interval(self, interval) -> None:
@@ -39,14 +55,22 @@ class ClickerConfig:
         self._interval = interval
         self.validate()
 
+    @property
+    def button(self) -> Button:
+        return self._button
+    
     @button.setter
-    def button(self, button):
+    def button(self, button) -> None:
         """Sets and validates the target mouse button."""
         self._button = button
         self.validate()
 
+    @property
+    def hotkey(self) -> keyboard:
+        return self._hotkey
+    
     @hotkey.setter
-    def hotkey(self, hotkey):
+    def hotkey(self, hotkey) -> None:
         """Sets and validates the toggle hotkey."""
         self._hotkey = hotkey
         self.validate()
