@@ -47,30 +47,30 @@ class ClickerConfig:
 
     @property
     def interval(self) -> float:
-        return self._interval
+        return self.interval
 
     @interval.setter
     def interval(self, interval) -> None:
         """Sets and validates the click interval."""
-        self._interval = interval
+        self.interval = interval
         self.validate()
 
     @property
     def button(self) -> Button:
-        return self._button
+        return self.button
     
     @button.setter
     def button(self, button) -> None:
         """Sets and validates the target mouse button."""
-        self._button = button
+        self.button = button
         self.validate()
 
     @property
     def hotkey(self) -> keyboard:
-        return self._hotkey
+        return self.hotkey
     
     @hotkey.setter
     def hotkey(self, hotkey) -> None:
         """Sets and validates the toggle hotkey."""
-        self._hotkey = hotkey
+        self.hotkey = hotkey
         self.validate()
