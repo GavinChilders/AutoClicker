@@ -70,4 +70,4 @@ class ClickerEngine:
     def _notify_state_change(self, running:bool) -> None:
         """Notifies an optional UI listener when the engine starts or stops"""
         if self._on_state_change is not None:
-            self.on_state_change(running)
+            self._on_state_change(running)
