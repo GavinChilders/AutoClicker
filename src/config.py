@@ -22,9 +22,9 @@ class ClickerConfig:
 
     def validate(self) -> None:
         """Validates all current configuration attributes."""
-        self._validate_interval(self._interval)
-        self._validate_button(self._button)
-        self._validate_hotkey(self._hotkey)
+        self._validate_interval(self.interval)
+        self._validate_button(self.button)
+        self._validate_hotkey(self.hotkey)
 
     @staticmethod
     def _validate_interval(interval) -> None:
