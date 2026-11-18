@@ -8,30 +8,30 @@ from src.config import ClickerConfig
 
 def test_valid_config():
     base_config = ClickerConfig()
-    assert base_config.interval == 1.0
-    assert base_config.button == mouse.Button.left
-    assert base_config.hotkey == keyboard.KeyCode.from_vk(97)
+    assert base_config._interval == 1.0
+    assert base_config._button == mouse.Button.left
+    assert base_config._hotkey == keyboard.KeyCode.from_vk(97)
 
     custom_config = ClickerConfig(
         interval=0.05,
         button=mouse.Button.middle,
         hotkey=keyboard.KeyCode.from_char("f"),
     )
-    assert custom_config.interval == 0.05
-    assert custom_config.button == mouse.Button.middle
-    assert custom_config.hotkey == keyboard.KeyCode.from_char("f")
+    assert custom_config._interval == 0.05
+    assert custom_config._button == mouse.Button.middle
+    assert custom_config._hotkey == keyboard.KeyCode.from_char("f")
 
 
 def test_setting_config():
     config = ClickerConfig()
     config.set_interval(0.5)
-    assert config.interval == 0.5
+    assert config._interval == 0.5
 
     config.set_button(mouse.Button.middle)
-    assert config.button == mouse.Button.middle
+    assert config._button == mouse.Button.middle
 
     config.set_hotkey(keyboard.KeyCode.from_char("f"))
-    assert config.hotkey == keyboard.KeyCode.from_char("f")
+    assert config._hotkey == keyboard.KeyCode.from_char("f")
 
 
 @pytest.mark.parametrize("bad_interval", [-0.05, 0, 0.0, "0.5", None])
@@ -41,7 +41,7 @@ def test_invalid_interval(bad_interval):
 
     config = ClickerConfig()
     with pytest.raises((ValueError, TypeError)):
-        config.set_interval(bad_interval)
+        config.interval = bad_interval
 
 
 @pytest.mark.parametrize("bad_button", ["middle_button", 1, None])
@@ -51,7 +51,7 @@ def test_invalid_button(bad_button):
 
     config = ClickerConfig()
     with pytest.raises((ValueError, TypeError)):
-        config.set_button(bad_button)
+        config.button = bad_button
 
 
 @pytest.mark.parametrize("bad_hotkey", ["f", 97, None])
@@ -61,4 +61,4 @@ def test_invalid_hotkey(bad_hotkey):
 
     config = ClickerConfig()
     with pytest.raises((ValueError, TypeError)):
-        config.set_hotkey(bad_hotkey)
+        config.hotkey = bad_hotkey

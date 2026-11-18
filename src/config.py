@@ -20,7 +20,7 @@ class ClickerConfig:
         self.hotkey = hotkey
         self.validate()
 
-    def validate(self):
+    def validate(self) -> None:
         """Validates that all configuration attributes are within safe bounds."""
         if isinstance(self.interval, bool) or not isinstance(self.interval, (int, float)):
             raise ValueError(f"Invalid interval type: {self.interval!r} -- Must be a number")
@@ -33,17 +33,20 @@ class ClickerConfig:
         if not isinstance(self.hotkey, (keyboard.KeyCode, keyboard.Key)):
             raise ValueError(f"Invalid keyboard hotkey: {self.hotkey!r}")
 
-    def set_interval(self, interval):
+    @interval.setter
+    def interval(self, interval) -> None:
         """Sets and validates the click interval."""
-        self.interval = interval
+        self._interval = interval
         self.validate()
 
-    def set_button(self, button):
+    @button.setter
+    def button(self, button):
         """Sets and validates the target mouse button."""
-        self.button = button
+        self._button = button
         self.validate()
 
-    def set_hotkey(self, hotkey):
+    @hotkey.setter
+    def hotkey(self, hotkey):
         """Sets and validates the toggle hotkey."""
-        self.hotkey = hotkey
+        self._hotkey = hotkey
         self.validate()
