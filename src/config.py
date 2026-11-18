@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Gavin Childers
 
 """Configuration settings and default parameters for the auto-clicker."""
+from typing import Union
 from pynput.mouse import Button
 from pynput import keyboard
 
@@ -11,20 +12,19 @@ class ClickerConfig:
 
     def __init__(
         self,
-        interval=1.0,
-        button=Button.left,
-        hotkey=keyboard.KeyCode.from_vk(97),
+        interval: float = 1.0,
+        button: Button = Button.left,
+        hotkey: Union[keyboard.KeyCode, keyboard.Key] = keyboard.KeyCode.from_vk(97),
     ):
         self.interval = interval
         self.button = button
         self.hotkey = hotkey
-        self.validate()
 
     def validate(self) -> None:
         """Validates all current configuration attributes."""
-        self._validate_interval(self.interval)
-        self._validate_button(self.button)
-        self._validate_hotkey(self.hotkey)
+        self._validate_interval(self._interval)
+        self._validate_button(self._button)
+        self._validate_hotkey(self._hotkey)
 
     @staticmethod
     def _validate_interval(interval) -> None:
@@ -47,30 +47,30 @@ class ClickerConfig:
 
     @property
     def interval(self) -> float:
-        return self.interval
+        return self._interval
 
     @interval.setter
     def interval(self, interval) -> None:
-        """Sets and validates the click interval."""
-        self.interval = interval
-        self.validate()
+        """Validates and sets the click interval."""
+        self._validate_interval(interval)
+        self._interval = float(interval)
 
     @property
     def button(self) -> Button:
-        return self.button
-    
+        return self._button
+
     @button.setter
     def button(self, button) -> None:
-        """Sets and validates the target mouse button."""
-        self.button = button
-        self.validate()
+        """Validates and sets the target mouse button."""
+        self._validate_button(button)
+        self._button = button
 
     @property
-    def hotkey(self) -> keyboard:
-        return self.hotkey
-    
+    def hotkey(self) -> Union[keyboard.KeyCode, keyboard.Key]:
+        return self._hotkey
+
     @hotkey.setter
     def hotkey(self, hotkey) -> None:
-        """Sets and validates the toggle hotkey."""
-        self.hotkey = hotkey
-        self.validate()
+        """Validates and sets the toggle hotkey."""
+        self._validate_hotkey(hotkey)
+        self._hotkey = hotkey
