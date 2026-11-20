@@ -5,7 +5,7 @@ from typing import Callable, Optional
 from pynput import keyboard
 from src.config import ClickerConfig
 
-class HotkeyListerner:
+class HotkeyListener:
 
     """Listens for global key presses and invoked a callback on matches"""
 
@@ -13,7 +13,7 @@ class HotkeyListerner:
         """Initalizes the Listerner"""
         self.config = config
         self._on_trigger = on_trigger
-        _hotkey_held = False
+        self._hotkey_held = False
         self._listener: Optional[keyboard.Listener] = None
 
     @property
@@ -35,7 +35,7 @@ class HotkeyListerner:
         if self._listener is not None:
             self._listener.stop()
             self._listener = None
-        self._hothey_held = False
+        self._hotkey_held = False
 
     def _keys_match(self, key) -> bool:
         """Compares an incoming pynput key event against configured hotkey"""
@@ -53,11 +53,11 @@ class HotkeyListerner:
 
     def _on_press(self, key) -> None:
         """Triggers callback once when configured hotkey is pressed"""
-        if self._keys_match(key) and not self._hothey_held:
-            self._hothey_held = True
+        if self._keys_match(key) and not self._hotkey_held:
+            self._hotkey_held = True
             self._on_trigger()
 
     def _on_release(self, key) -> None:
         """Resets the hold gaurd when the configured hotkey is released."""
         if self._keys_match(key):
-            self._hothey_held = False
+            self._hotkey_held = False
